@@ -1,0 +1,42 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "envPrefix": {
+      "value": "japoondevicesimulator"
+    },
+    "envPrefixLiteral": {
+      "value": "devicesimulator"
+    },
+    "dnsName": {
+      "value": "japoondevicesimulator"
+    },
+    "adminUsername": {
+      "value": "superuser"
+    },
+    "adminPassword": {
+      "value": "P@ssword!123"
+    },
+    "node0VMSize": {
+      "value": "Standard_D3_v2"
+    },
+    "node0Count": {
+      "value": "3"
+    },
+    "node1VMSize": {
+      "value": "Standard_D3_v2"
+    },
+    "node1Count": {
+      "value": "3"
+    },
+    "omsServiceTier": {
+      "value": "Standalone"
+    },
+    "serviceFabricReliabilty": {
+      "value": "Bronze"
+    },
+    "omsPerfCounterInterval": {
+      "value": "30"
+    }
+  }
+}
