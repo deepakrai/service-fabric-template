@@ -283,6 +283,7 @@
     "lbPoolID1": "[concat(variables('lbID1'),'/backendAddressPools/LoadBalancerBEAddressPool')]",
     "lbProbeID1": "[concat(variables('lbID1'),'/probes/FabricGatewayProbe')]",
     "lbHttpProbeID1": "[concat(variables('lbID1'),'/probes/FabricHttpGatewayProbe')]",
+    "lbReverseProxyProbeID1": "[concat(variables('lbID1'),'/probes/FabricReverseProxyProbe')]",
     "lbNatPoolID1": "[concat(variables('lbID1'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
     "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]"
   },
@@ -665,6 +666,25 @@
               },
               "protocol": "Tcp"
             }
+          },
+          {
+            "name": "LBSFReverseProxyRule",
+            "properties": {
+                "backendAddressPool": {
+                    "id": "[variables('lbPoolID1')]"
+                },
+                "backendPort": "[parameters('sfReverseProxyPort')]",
+                "enableFloatingIP": false,
+                "frontendIPConfiguration": {
+                    "id": "[variables('lbIPConfig1')]"
+                },
+                "frontendPort": "[parameters('sfReverseProxyPort')]",
+                "idleTimeoutInMinutes": 5,
+                "probe": {
+                    "id": "[variables('lbReverseProxyProbeID1')]"
+                },
+                "protocol": "Tcp"
+            }
           }
         ],
         "probes": [
@@ -685,7 +705,16 @@
               "port": "[variables('nt0fabricHttpGatewayPort')]",
               "protocol": "Tcp"
             }
-          }
+          },
+          {
+            "name": "FabricReverseProxyProbe",
+            "properties": {
+                "intervalInSeconds": 5,
+                "numberOfProbes": 2,
+                "port": "[parameters('sfReverseProxyPort')]",
+                "protocol": "Tcp"
+            }
+          }  
         ],
         "inboundNatPools": [
           {
