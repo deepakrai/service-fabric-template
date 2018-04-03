@@ -572,19 +572,6 @@
             }
           },
           {
-            "name": "blockAll",
-            "properties": {
-              "access": "Deny",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "*",
-              "direction": "Inbound",
-              "priority": 4095,
-              "protocol": "*",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*"
-            }
-          },
-          {
             "name": "allowVNetRDP",
             "properties": {
               "access": "Allow",
@@ -743,15 +730,28 @@
       "properties": {
         "securityRules": [
           {
-            "name": "allowSvcFabSMB",
+            "name": "allowSvcFabPortal",
             "properties": {
               "access": "Allow",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "445",
+              "destinationPortRange": "[variables('nt1fabricHttpGatewayPort')]",
               "direction": "Inbound",
-              "priority": 3950,
+              "priority": 3900,
               "protocol": "*",
-              "sourceAddressPrefix": "VirtualNetwork",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allowSvcFabClient",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "[variables('nt1fabricTcpGatewayPort')]",
+              "direction": "Inbound",
+              "priority": 3910,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
             }
           },
@@ -782,32 +782,6 @@
             }
           },
           {
-            "name": "allowSvcFabPortal",
-            "properties": {
-              "access": "Allow",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "[variables('nt1fabricHttpGatewayPort')]",
-              "direction": "Inbound",
-              "priority": 3900,
-              "protocol": "*",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*"
-            }
-          },
-          {
-            "name": "allowSvcFabClient",
-            "properties": {
-              "access": "Allow",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "[variables('nt1fabricTcpGatewayPort')]",
-              "direction": "Inbound",
-              "priority": 3910,
-              "protocol": "*",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*"
-            }
-          },
-          {
             "name": "allowSvcFabApplication",
             "properties": {
               "access": "Allow",
@@ -821,15 +795,15 @@
             }
           },
           {
-            "name": "blockAll",
+            "name": "allowSvcFabSMB",
             "properties": {
-              "access": "Deny",
+              "access": "Allow",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "*",
+              "destinationPortRange": "445",
               "direction": "Inbound",
-              "priority": 4095,
+              "priority": 3950,
               "protocol": "*",
-              "sourceAddressPrefix": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
             }
           },
@@ -841,6 +815,19 @@
               "destinationPortRange": "3389-4500",
               "direction": "Inbound",
               "priority": 3960,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allowReverseProxy",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "[parameters('sfReverseProxyPort')]",
+              "direction": "Inbound",
+              "priority": 3970,
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
