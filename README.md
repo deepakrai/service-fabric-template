@@ -5,6 +5,7 @@ Deploys Service Fabric with:
 * 2 Node Types
 * Managed Disks
 * OMS
+* Unsecured cluster
 
 ## Usage
 
