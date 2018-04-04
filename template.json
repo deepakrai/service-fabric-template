@@ -156,7 +156,7 @@
     },
     "omsWorkspaceName": {
       "type": "string",
-      "defaultValue": "clusteroms",
+      "defaultValue": "oms",
       "metadata": {
         "description": "Name of your OMS Log Analytics Workspace"
       }
@@ -224,14 +224,13 @@
     },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/oms-all-deploy",
+      "defaultValue": "https://raw.githubusercontent.com/jpoon/service-fabric-template/master",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located"
       }
-    },
+    }
   },
   "variables": {
-    "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-', parameters('omsWorkspaceName'))]",
     "storageAccountType": "[parameters('storageAccountType')]",
     "vmName": "vm",
     "vmImageVersion": "latest",
@@ -282,7 +281,7 @@
     "lbNatPoolID1": "[concat(variables('lbID1'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
     "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]",
     "nestedTemplates": {
-      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedtemplates/omsWorkspace.json')]"
+      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]"
     }
   },
   "resources": [
@@ -291,7 +290,7 @@
       "apiVersion": "2016-02-01",
       "name": "omsWorkspace",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'omsWorkspace')]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -301,13 +300,13 @@
         },
         "parameters": {
           "omsWorkspaceName": {
-            "value": "[variables('omsWorkspaceName')]"
+            "value": "[parameters('omsWorkspaceName')]"
           },
           "omsWorkspaceRegion": {
             "value": "[parameters('omsWorkspaceRegion')]"
           },
           "omsServiceTier": {
-            "value": "[parameters('omsWorkspaceRegion')]"
+            "value": "[parameters('omsServiceTier')]"
           },
           "omsPerfCounterInterval": {
             "value": "[parameters('omsPerfCounterInterval')]"
@@ -885,7 +884,8 @@
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName0'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
+        "omsWorkspace"
       ],
       "properties": {
         "overprovision": false,
@@ -924,10 +924,10 @@
                   "typeHandlerVersion": "1.0",
                   "autoUpgradeMinorVersion": true,
                   "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
+                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').customerId]"
                   },
                   "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
+                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
                   }
                 }
               },
@@ -1080,7 +1080,8 @@
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName1'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
+        "omsWorkspace"
       ],
       "properties": {
         "overprovision": false,
@@ -1119,10 +1120,10 @@
                   "typeHandlerVersion": "1.0",
                   "autoUpgradeMinorVersion": true,
                   "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
+                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').customerId]"
                   },
                   "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
+                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
                   }
                 }
               },
@@ -1359,11 +1360,11 @@
     },
     "omsWorkspaceId": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
+      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').customerId]"
     },
     "omsWorkspaceKey": {
       "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').primarySharedKey]"
+      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').primarySharedKey]"
     }
   }
 }

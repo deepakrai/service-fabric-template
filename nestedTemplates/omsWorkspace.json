@@ -5,7 +5,7 @@
         "omsWorkspaceName": {
             "type": "string",
             "metadata": {
-                "description": "Assign a name for the Log Analytic Workspace Name"
+                "description": "Name for the Log Analytic Workspace"
             }
         },
         "omsWorkspaceRegion": {
@@ -28,7 +28,7 @@
                 "Standalone",
                 "PerNode"
             ],
-            "defaultValue": "PerNode",
+            "defaultValue": "Free",
             "metadata": {
                 "description": "Service Tier: Free, Standalone, or PerNode"
             }
@@ -39,21 +39,27 @@
             "metadata": {
                 "description": "Performance counter reporting interval (in seconds)"
             }
+        },
+        "applicationDiagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account name for OMS to monitor"
+            }
         }
     },
     "variables": {
         "batch": {
             "solutions": [
                 {
-                    "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('Security', ' (', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "Security"
                 },
                 {
-                    "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('AgentHealthAssessment', ' (', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "AgentHealthAssessment"
                 },
                 {
-                    "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('ServiceFabric', ' (', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "ServiceFabric"
                 }
             ]
@@ -215,7 +221,7 @@
                     "properties": {
                         "objectName": "Memory",
                         "instanceName": "*",
-                        "intervalSeconds": 10,
+                        "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
                         "counterName": "Available MBytes"
                     }
                 },
@@ -347,6 +353,27 @@
                                 "eventType": "Warning"
                             }
                         ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "ApplicationDiagnosticsStorage",
+                    "type": "storageinsightconfigs",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename'))]"
+                    ],
+                    "properties": {
+                        "containers": [],
+                        "tables": [
+                            "WADPerformanceCountersTable",
+                            "WADServiceFabric*EventTable",
+                            "WADWindowsEventLogsTable",
+                            "WADETWEventTable"
+                        ],
+                        "storageAccount": {
+                            "id": "[resourceId('Microsoft.Storage/storageaccounts/', parameters('applicationDiagnosticsStorageAccountName'))]",
+                            "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
+                        }
                     }
                 }
             ]
