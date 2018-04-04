@@ -1,5 +1,6 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",  "contentVersion": "1.0.0.0",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
   "parameters": {
     "clusterDnsName": {
       "type": "string",
@@ -153,14 +154,14 @@
         "description": "Remote desktop user password. Must be a strong password"
       }
     },
-    "omsWorkspacename": {
+    "omsWorkspaceName": {
       "type": "string",
       "defaultValue": "clusteroms",
       "metadata": {
         "description": "Name of your OMS Log Analytics Workspace"
       }
     },
-    "omsRegion": {
+    "omsWorkspaceRegion": {
       "type": "string",
       "defaultValue": "East US",
       "allowedValues": [
@@ -220,10 +221,17 @@
       "metadata": {
         "description": "Transfer rate for performance counters uploaded to diagnostics."
       }
-    }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/oms-all-deploy",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located"
+      }
+    },
   },
   "variables": {
-    "omsWorkspacename": "[concat(parameters('clusterDnsName'), '-', parameters('omsWorkspacename'))]",
+    "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-', parameters('omsWorkspaceName'))]",
     "storageAccountType": "[parameters('storageAccountType')]",
     "vmName": "vm",
     "vmImageVersion": "latest",
@@ -254,9 +262,6 @@
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "supportLogStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'log'))]",
     "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'diag'))]",
-    "serviceFabricOmsSolution": {
-      "Name": "[toLower(concat(variables('omsWorkspacename'), '-servicefabric-solution'))]", 
-      "GalleryName": "ServiceFabric",
     "pipName0": "pip-sf",
     "lbName0": "[toLower(concat(parameters('clusterDnsName'), '-LB-', variables('vmNodeType0Name')))]",
     "lbID0": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName0'))]",
@@ -275,9 +280,44 @@
     "lbHttpProbeID1": "[concat(variables('lbID1'),'/probes/FabricHttpGatewayProbe')]",
     "lbReverseProxyProbeID1": "[concat(variables('lbID1'),'/probes/FabricReverseProxyProbe')]",
     "lbNatPoolID1": "[concat(variables('lbID1'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
-    "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]"
+    "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]",
+    "nestedTemplates": {
+      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedtemplates/omsWorkspace.json')]"
+    }
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-02-01",
+      "name": "omsWorkspace",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'omsWorkspace')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('nestedTemplates').omsWorkspace]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "omsWorkspaceName": {
+            "value": "[variables('omsWorkspaceName')]"
+          },
+          "omsWorkspaceRegion": {
+            "value": "[parameters('omsWorkspaceRegion')]"
+          },
+          "omsServiceTier": {
+            "value": "[parameters('omsWorkspaceRegion')]"
+          },
+          "omsPerfCounterInterval": {
+            "value": "[parameters('omsPerfCounterInterval')]"
+          },
+          "applicationDiagnosticsStorageAccountName": {
+            "value": "[variables('applicationDiagnosticsStorageAccountName')]"
+          }
+        }
+      }
+    },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
@@ -654,20 +694,20 @@
           {
             "name": "LBSFReverseProxyRule",
             "properties": {
-                "backendAddressPool": {
-                    "id": "[variables('lbPoolID1')]"
-                },
-                "backendPort": "[parameters('sfReverseProxyPort')]",
-                "enableFloatingIP": false,
-                "frontendIPConfiguration": {
-                    "id": "[variables('lbIPConfig1')]"
-                },
-                "frontendPort": "[parameters('sfReverseProxyPort')]",
-                "idleTimeoutInMinutes": 5,
-                "probe": {
-                    "id": "[variables('lbReverseProxyProbeID1')]"
-                },
-                "protocol": "Tcp"
+              "backendAddressPool": {
+                "id": "[variables('lbPoolID1')]"
+              },
+              "backendPort": "[parameters('sfReverseProxyPort')]",
+              "enableFloatingIP": false,
+              "frontendIPConfiguration": {
+                "id": "[variables('lbIPConfig1')]"
+              },
+              "frontendPort": "[parameters('sfReverseProxyPort')]",
+              "idleTimeoutInMinutes": 5,
+              "probe": {
+                "id": "[variables('lbReverseProxyProbeID1')]"
+              },
+              "protocol": "Tcp"
             }
           }
         ],
@@ -693,12 +733,12 @@
           {
             "name": "FabricReverseProxyProbe",
             "properties": {
-                "intervalInSeconds": 5,
-                "numberOfProbes": 2,
-                "port": "[parameters('sfReverseProxyPort')]",
-                "protocol": "Tcp"
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2,
+              "port": "[parameters('sfReverseProxyPort')]",
+              "protocol": "Tcp"
             }
-          }  
+          }
         ],
         "inboundNatPools": [
           {
@@ -884,10 +924,10 @@
                   "typeHandlerVersion": "1.0",
                   "autoUpgradeMinorVersion": true,
                   "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').customerId]"
+                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
                   },
                   "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')),'2015-11-01-preview').primarySharedKey]"
+                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
                   }
                 }
               },
@@ -1079,10 +1119,10 @@
                   "typeHandlerVersion": "1.0",
                   "autoUpgradeMinorVersion": true,
                   "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').customerId]"
+                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
                   },
                   "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')),'2015-11-01-preview').primarySharedKey]"
+                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
                   }
                 }
               },
@@ -1310,285 +1350,6 @@
       "tags": {
         "clusterName": "[parameters('clusterDnsName')]"
       }
-    },
-    {
-      "apiVersion": "2015-11-01-preview",
-      "location": "[parameters('omsRegion')]",
-      "name": "[variables('serviceFabricOmsSolution').Name]",
-      "type": "Microsoft.OperationsManagement/solutions",
-      "id": "[resourceId('Microsoft.OperationsManagement/solutions/', variables('serviceFabricOmsSolution').Name)]",
-      "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename'))]"
-      ],
-      "properties": {
-        "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename'))]"
-      },
-      "plan": {
-        "name": "[variables('serviceFabricOmsSolution').Name]",
-        "publisher": "Microsoft",
-        "product": "[Concat('OMSGallery/', variables('serviceFabricOmsSolution').GalleryName)]",
-        "promotionCode": ""
-      }
-    },
-    {
-      "apiVersion": "2017-03-15-preview",
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "name": "[variables('omsWorkspacename')]",
-      "location": "[parameters('omsRegion')]",
-      "properties": {
-        "sku": {
-          "name": "[parameters('omsServiceTier')]"
-        }
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-11-01-preview",
-          "name": "[concat(variables('applicationDiagnosticsStorageAccountName'),variables('omsWorkspacename'))]",
-          "type": "storageinsightconfigs",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename'))]",
-            "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
-          ],
-          "properties": {
-            "containers": [],
-            "tables": [
-              "WADPerformanceCountersTable",
-              "WADServiceFabric*EventTable",
-              "WADWindowsEventLogsTable",
-              "WADETWEventTable"
-            ],
-            "storageAccount": {
-              "id": "[resourceId('Microsoft.Storage/storageaccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
-              "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
-            }
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskAvgReadPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Avg. Disk sec/Read"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskAvgWritePerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Avg. Disk sec/Write"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskCurrentQueueLengthPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Current Disk Queue Length"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskReadsSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Disk Reads/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskTransSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Disk Transfers/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskWriteSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Disk Writes/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskFreeMegabytesPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Free Megabytes"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "DiskPctFreeSpacePerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "LogicalDisk",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "% Free Space"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "MemoryAvailableMBytesPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Memory",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Available MBytes"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "MemoryPctCommittedPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Memory",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "% Committed Bytes In Use"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "NetworkBytesReceivedSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Network Adapter",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Bytes Received/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "NetworkBytesSentSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Network Adapter",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Bytes Sent/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "NetworkBytesTotalSecPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Network Interface",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Bytes Total/sec"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "ProcessorPctTotalTimePerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "Processor",
-            "instanceName": "_Total",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "% Processor Time"
-          }
-        },
-        {
-          "apiVersion": "2015-11-01-preview",
-          "type": "datasources",
-          "name": "SystemProcessorQueueLengthPerfCounter",
-          "dependsOn": [
-            "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
-          ],
-          "kind": "WindowsPerformanceCounter",
-          "properties": {
-            "objectName": "System",
-            "instanceName": "*",
-            "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-            "counterName": "Processor Queue Length"
-          }
-        }
-      ]
     }
   ],
   "outputs": {
@@ -1598,11 +1359,11 @@
     },
     "omsWorkspaceId": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').customerId]"
+      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
     },
     "omsWorkspaceKey": {
       "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').primarySharedKey]"
+      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').primarySharedKey]"
     }
   }
 }

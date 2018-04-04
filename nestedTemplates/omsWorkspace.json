@@ -474,5 +474,14 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "omsWorkspaceId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').customerId]"
+        },
+        "omsWorkspaceKey": {
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').primarySharedKey]"
+        }
+    }
 }
