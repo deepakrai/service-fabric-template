@@ -10,7 +10,7 @@
         },
         "omsWorkspaceRegion": {
             "type": "string",
-            "defaultValue": "West Europe",
+            "defaultValue": "East US",
             "allowedValues": [
                 "East US",
                 "West Europe",
@@ -28,7 +28,7 @@
                 "Standalone",
                 "PerNode"
             ],
-            "defaultValue": "Free",
+            "defaultValue": "PerNode",
             "metadata": {
                 "description": "Service Tier: Free, Standalone, or PerNode"
             }
@@ -39,17 +39,10 @@
             "metadata": {
                 "description": "Performance counter reporting interval (in seconds)"
             }
-        },
-        "applicationDiagnosticsStorageAccountName": {
-            "type": "string",
-            "defaultValue": "60",
-            "metadata": {
-                "description": "Storage Account name for OMS to monitor"
-            }
         }
     },
     "variables": {
-        "batch1": {
+        "batch": {
             "solutions": [
                 {
                     "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
@@ -58,18 +51,6 @@
                 {
                     "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "AgentHealthAssessment"
-                },
-                {
-                    "name": "[concat('ChangeTracking', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "ChangeTracking"
-                },
-                {
-                    "name": "[concat('Updates', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "Updates"
-                },
-                {
-                    "name": "[concat('AzureActivity', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "AzureActivity"
                 },
                 {
                     "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
@@ -88,8 +69,7 @@
             "properties": {
                 "sku": {
                     "name": "[parameters('omsServiceTier')]"
-                },
-                "retentionInDays": 120
+                }
             },
             "resources": [
                 {
@@ -102,64 +82,6 @@
                     "kind": "AzureActivityLog",
                     "properties": {
                         "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
-                    }
-                },
-                {
-                    "name": "[concat(parameters('omsWorkspaceName'), '/', 'SoftwareUpdateFailed1')]",
-                    "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-                    "apiVersion": "2017-03-15-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "tags": {},
-                    "properties": {
-                        "ETag": "*",
-                        "query": "Event | where EventID == 20 and Source == \"Microsoft-Windows-WindowsUpdateClient\" and EventLog == \"System\" and TimeGenerated > ago(1d)",
-                        "displayName": "Failed Software Updates in the last day",
-                        "category": "Software Updates"
-                    }
-                },
-                {
-                    "apiVersion": "2017-03-15-preview",
-                    "name": "[concat(parameters('omsWorkspaceName'), '/', 'HyperV1')]",
-                    "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "properties": {
-                        "ETag": "*",
-                        "category": "HyperV",
-                        "displayName": "VMs created last 24 hours",
-                        "query": "EventLog=\"Microsoft-Windows-Hyper-V-VMMS-Admin\" EventLevelName=information EventID=13002 TimeGenerated>NOW-1DAY "
-                    }
-                },
-                {
-                    "apiVersion": "2017-03-15-preview",
-                    "name": "[concat(parameters('omsWorkspaceName'), '/', 'HyperV2')]",
-                    "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "properties": {
-                        "ETag": "*",
-                        "category": "HyperV",
-                        "displayName": "VMs deleted last 24 hours",
-                        "Query": "EventLog=\"Microsoft-Windows-Hyper-V-VMMS-Admin\" EventLevelName=information EventID=13003 TimeGenerated>NOW-1DAY"
-                    }
-                },
-                {
-                    "name": "[concat(parameters('omsWorkspaceName'), '/', 'SoftwareUpdateFailed2')]",
-                    "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-                    "apiVersion": "2017-03-15-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "tags": {},
-                    "properties": {
-                        "ETag": "*",
-                        "query": "Type=Event EventID=20 Source=\"Microsoft-Windows-WindowsUpdateClient\" EventLog=\"System\" TimeGenerated>NOW-168HOURS",
-                        "displayName": "A Software Update Installation Failed",
-                        "category": "Software Updates"
                     }
                 },
                 {
@@ -302,7 +224,7 @@
                     "type": "datasources",
                     "name": "MemoryPctCommittedPerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -317,7 +239,7 @@
                     "type": "datasources",
                     "name": "NetworkBytesReceivedSecPerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -332,7 +254,7 @@
                     "type": "datasources",
                     "name": "NetworkBytesSentSecPerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -347,7 +269,7 @@
                     "type": "datasources",
                     "name": "NetworkBytesTotalSecPerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -362,7 +284,7 @@
                     "type": "datasources",
                     "name": "ProcessorPctTotalTimePerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -377,7 +299,7 @@
                     "type": "datasources",
                     "name": "SystemProcessorQueueLengthPerfCounter",
                     "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
                     "kind": "WindowsPerformanceCounter",
                     "properties": {
@@ -426,49 +348,27 @@
                             }
                         ]
                     }
-                },
-                {
-                    "apiVersion": "2015-11-01-preview",
-                    "name": "[concat(parameters('applicationDiagnosticsStorageAccountName')]",
-                    "type": "storageinsightconfigs",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename'))]",
-                        "[concat('Microsoft.Storage/storageAccounts/', parameters('applicationDiagnosticsStorageAccountName'))]"
-                    ],
-                    "properties": {
-                        "containers": [],
-                        "tables": [
-                            "WADPerformanceCountersTable",
-                            "WADServiceFabric*EventTable",
-                            "WADWindowsEventLogsTable",
-                            "WADETWEventTable"
-                        ],
-                        "storageAccount": {
-                            "id": "[resourceId('Microsoft.Storage/storageaccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
-                            "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
-                        }
-                    }
                 }
             ]
         },
         {
             "apiVersion": "2015-11-01-preview",
             "type": "Microsoft.OperationsManagement/solutions",
-            "name": "[concat(variables('batch1').solutions[copyIndex()].Name)]",
+            "name": "[concat(variables('batch').solutions[copyIndex()].Name)]",
             "location": "[parameters('omsWorkspaceRegion')]",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
             ],
             "copy": {
                 "name": "solutionCopy",
-                "count": "[length(variables('batch1').solutions)]"
+                "count": "[length(variables('batch').solutions)]"
             },
             "properties": {
                 "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('omsWorkspaceName'))]"
             },
             "plan": {
-                "name": "[variables('batch1').solutions[copyIndex()].name]",
-                "product": "[concat('OMSGallery/', variables('batch1').solutions[copyIndex()].marketplaceName)]",
+                "name": "[variables('batch').solutions[copyIndex()].name]",
+                "product": "[concat('OMSGallery/', variables('batch').solutions[copyIndex()].marketplaceName)]",
                 "promotionCode": "",
                 "publisher": "Microsoft"
             }
@@ -477,11 +377,11 @@
     "outputs": {
         "omsWorkspaceId": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').customerId]"
+            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename')), '2015-11-01-preview').customerId]"
         },
         "omsWorkspaceKey": {
             "type": "string",
-            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename')), '2015-11-01-preview').primarySharedKey]"
+            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename')), '2015-11-01-preview').primarySharedKey]"
         }
     }
 }
