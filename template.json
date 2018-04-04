@@ -154,13 +154,6 @@
         "description": "Remote desktop user password. Must be a strong password"
       }
     },
-    "omsWorkspaceName": {
-      "type": "string",
-      "defaultValue": "oms",
-      "metadata": {
-        "description": "Name of your OMS Log Analytics Workspace"
-      }
-    },
     "omsWorkspaceRegion": {
       "type": "string",
       "defaultValue": "East US",
@@ -279,7 +272,7 @@
     "lbReverseProxyProbeID1": "[concat(variables('lbID1'),'/probes/FabricReverseProxyProbe')]",
     "lbNatPoolID1": "[concat(variables('lbID1'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
     "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]",
-    "omsWorkspaceName": "[coalesce(parameters('omsWorkspaceName'), concat(parameters('clusterDnsName'), '-oms'))]",
+    "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-oms')]",
     "nestedTemplates": {
       "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]"
     }
@@ -533,8 +526,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            },
-            "comments": "allow SMB traffic within the net, used by fabric to move packages around"
+            }
           },
           {
             "name": "allowSvcFabCluser",
@@ -547,8 +539,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            },
-            "comments": "allow ports within vnet that are used by the fabric to talk between nodes"
+            }
           },
           {
             "name": "allowSvcFabEphemeral",
@@ -561,8 +552,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            },
-            "comments": "allow fabric ephemeral ports within the vnet"
+            }
           },
           {
             "name": "allowSvcFabPortal",
@@ -575,8 +565,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            },
-            "comments": "allow port used to access the fabric cluster web portal"
+            }
           },
           {
             "name": "allowSvcFabClient",
@@ -589,8 +578,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            },
-            "comments": "allow port used by the fabric client (includes powershell)"
+            }
           },
           {
             "name": "allowSvcFabApplication",
@@ -603,8 +591,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            },
-            "comments": "allow fabric application ports within the vnet"
+            }
           },
           {
             "name": "allowVNetRDP",
@@ -617,8 +604,7 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            },
-            "comments": "allow RDP within the net"
+            }
           }
         ]
       },
