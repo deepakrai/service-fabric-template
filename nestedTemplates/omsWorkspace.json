@@ -28,7 +28,7 @@
                 "Standalone",
                 "PerNode"
             ],
-            "defaultValue": "Free",
+            "defaultValue": "PerNode",
             "metadata": {
                 "description": "Service Tier: Free, Standalone, or PerNode"
             }
@@ -51,15 +51,15 @@
         "batch": {
             "solutions": [
                 {
-                    "name": "[concat('Security', ' (', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "Security"
                 },
                 {
-                    "name": "[concat('AgentHealthAssessment', ' (', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "AgentHealthAssessment"
                 },
                 {
-                    "name": "[concat('ServiceFabric', ' (', parameters('omsWorkspaceName'), ')')]",
+                    "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "ServiceFabric"
                 }
             ]

@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "clusterDnsName": {
-      "value": "japoonasftest"
+      "value": "japoonasftest1"
     },
     "adminUsername": {
       "value": "superuser"
@@ -24,7 +24,7 @@
       "value": "3"
     },
     "omsServiceTier": {
-      "value": "Standalone"
+      "value": "PerNode"
     },
     "serviceFabricReliabilty": {
       "value": "Bronze"
