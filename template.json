@@ -254,11 +254,9 @@
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "supportLogStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'log'))]",
     "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'diag'))]",
-    "solution": "[toLower(concat('oms-asf-', variables('omsWorkspacename')))]",
     "serviceFabricOmsSolution": {
-      "Name": "[Concat('Service Fabric', '(', variables('omsWorkspacename'), ')')]",
-      "GalleryName": "ServiceFabric"
-    },
+      "Name": "[toLower(concat(variables('omsWorkspacename'), '-servicefabric-solution'))]", 
+      "GalleryName": "ServiceFabric",
     "pipName0": "pip-sf",
     "lbName0": "[toLower(concat(parameters('clusterDnsName'), '-LB-', variables('vmNodeType0Name')))]",
     "lbID0": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName0'))]",
@@ -496,7 +494,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow SMB traffic within the net, used by fabric to move packages around"
           },
           {
             "name": "allowSvcFabCluser",
@@ -509,7 +508,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow ports within vnet that are used by the fabric to talk between nodes"
           },
           {
             "name": "allowSvcFabEphemeral",
@@ -522,7 +522,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "VirtualNetwork",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow fabric ephemeral ports within the vnet"
           },
           {
             "name": "allowSvcFabPortal",
@@ -535,7 +536,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow port used to access the fabric cluster web portal"
           },
           {
             "name": "allowSvcFabClient",
@@ -548,7 +550,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow port used by the fabric client (includes powershell)"
           },
           {
             "name": "allowSvcFabApplication",
@@ -561,7 +564,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow fabric application ports within the vnet"
           },
           {
             "name": "allowVNetRDP",
@@ -574,7 +578,8 @@
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
-            }
+            },
+            "comments": "allow RDP within the net"
           }
         ]
       },
@@ -865,7 +870,7 @@
                     "clusterEndpoint": "[reference(parameters('clusterDnsName')).clusterEndpoint]",
                     "nodeTypeRef": "[variables('vmNodeType0Name')]",
                     "nicPrefixOverride": "[variables('subnet0Prefix')]",
-                    "dataPath": "D:\\\\SvcFab",
+                    "dataPath": "D:\\SvcFab",
                     "durabilityLevel": "[parameters('node0Durability')]"
                   },
                   "typeHandlerVersion": "1.0"
@@ -1060,7 +1065,7 @@
                     "clusterEndpoint": "[reference(parameters('clusterDnsName')).clusterEndpoint]",
                     "nodeTypeRef": "[variables('vmNodeType1Name')]",
                     "nicPrefixOverride": "[variables('subnet1Prefix')]",
-                    "dataPath": "D:\\\\SvcFab",
+                    "dataPath": "D:\\SvcFab",
                     "durabilityLevel": "[parameters('node1Durability')]"
                   },
                   "typeHandlerVersion": "1.0"
@@ -1311,7 +1316,7 @@
       "location": "[parameters('omsRegion')]",
       "name": "[variables('serviceFabricOmsSolution').Name]",
       "type": "Microsoft.OperationsManagement/solutions",
-      "id": "[resourceId('Microsoft.OperationsManagement/solutions/', variables('solution'))]",
+      "id": "[resourceId('Microsoft.OperationsManagement/solutions/', variables('serviceFabricOmsSolution').Name)]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename'))]"
       ],
