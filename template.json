@@ -1,17 +1,12 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-  "contentVersion": "1.0.0.0",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",  "contentVersion": "1.0.0.0",
   "parameters": {
-    "envPrefix": {
+    "clusterDnsName": {
       "type": "string",
+      "minLength": 3,
+      "maxLength": 23,
       "metadata": {
-        "description": "Prefix used for resource naming for current environment"
-      }
-    },
-    "envPrefixLiteral": {
-      "type": "string",
-      "metadata": {
-        "description": "Literal prefix used for resource naming for current environment"
+        "description": "Globally unique name of your cluster, between 3 and 23 characters. Letters and numbers only"
       }
     },
     "computeLocation": {
@@ -158,12 +153,6 @@
         "description": "Remote desktop user password. Must be a strong password"
       }
     },
-    "dnsName": {
-      "type": "string",
-      "metadata": {
-        "description": "DNS name for your Service Fabric System Service Cluster endpoint"
-      }
-    },
     "omsWorkspacename": {
       "type": "string",
       "defaultValue": "clusteroms",
@@ -234,19 +223,17 @@
     }
   },
   "variables": {
-    "clusterName": "[toLower(concat('sf-', parameters('envPrefix')))]",
-    "omsWorkspacename": "[concat(parameters('envPrefixLiteral'), parameters('omsWorkspacename'))]",
+    "omsWorkspacename": "[concat(parameters('clusterDnsName'), '-', parameters('omsWorkspacename'))]",
     "storageAccountType": "[parameters('storageAccountType')]",
     "vmName": "vm",
     "vmImageVersion": "latest",
     "vmImageSku": "2016-Datacenter",
     "vmImageOffer": "WindowsServer",
     "vmImagePublisher": "MicrosoftWindowsServer",
-    "virtualNetworkName": "[concat(parameters('envPrefix'), '-', 'vnet')]",
+    "virtualNetworkName": "[concat(parameters('clusterDnsName'), '-', 'vnet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "addressPrefix": "10.0.0.0/16",
     "nicName": "nic",
-    "lbIPName": "pip",
     "nt0applicationStartPort": 20000,
     "nt0applicationEndPort": 30000,
     "nt0ephemeralStartPort": 49152,
@@ -265,11 +252,15 @@
     "subnet1Name": "Subnet-1",
     "subnet1Prefix": "10.0.1.0/24",
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
-    "supportLogStorageAccountName": "[toLower(concat(parameters('envPrefixLiteral'), 'logstrg'))]",
-    "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('envPrefixLiteral'), 'diagstrg'))]",
+    "supportLogStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'log'))]",
+    "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'diag'))]",
     "solution": "[toLower(concat('oms-asf-', variables('omsWorkspacename')))]",
-    "solutionName": "ServiceFabric",
-    "lbName0": "[toLower(concat(parameters('envPrefix'), '-LB-', variables('clusterName'), '-', variables('vmNodeType0Name')))]",
+    "serviceFabricOmsSolution": {
+      "Name": "[Concat('Service Fabric', '(', variables('omsWorkspacename'), ')')]",
+      "GalleryName": "ServiceFabric"
+    },
+    "pipName0": "pip-sf",
+    "lbName0": "[toLower(concat(parameters('clusterDnsName'), '-LB-', variables('vmNodeType0Name')))]",
     "lbID0": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName0'))]",
     "lbIPConfig0": "[concat(variables('lbID0'),'/frontendIPConfigurations/LoadBalancerIPConfig')]",
     "lbPoolID0": "[concat(variables('lbID0'),'/backendAddressPools/LoadBalancerBEAddressPool')]",
@@ -277,7 +268,8 @@
     "lbHttpProbeID0": "[concat(variables('lbID0'),'/probes/FabricHttpGatewayProbe')]",
     "lbNatPoolID0": "[concat(variables('lbID0'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
     "vmNodeType0Name": "[toLower(concat(variables('vmName'), '-sf'))]",
-    "lbName1": "[toLower(concat(parameters('envPrefix'), '-LB-', variables('clusterName'), '-', variables('vmNodeType1Name')))]",
+    "pipName1": "pip-backend",
+    "lbName1": "[toLower(concat(parameters('clusterDnsName'), '-LB-', variables('vmNodeType1Name')))]",
     "lbID1": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName1'))]",
     "lbIPConfig1": "[concat(variables('lbID1'),'/frontendIPConfigurations/LoadBalancerIPConfig')]",
     "lbPoolID1": "[concat(variables('lbID1'),'/backendAddressPools/LoadBalancerBEAddressPool')]",
@@ -297,7 +289,7 @@
         "accountType": "[variables('storageAccountType')]"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterDnsName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -309,7 +301,7 @@
         "accountType": "[variables('storageAccountType')]"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterDnsName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -349,37 +341,37 @@
         ]
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(variables('lbIPName'), '-backend')]",
+      "name": "[variables('pipName1')]",
       "location": "[parameters('computeLocation')]",
       "properties": {
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('dnsName'),'-','backend')]"
+          "domainNameLabel": "[concat(parameters('clusterDnsName'),'-','backend')]"
         },
         "publicIPAllocationMethod": "[parameters('publicIPAddressType')]"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(variables('lbIPName'), '-sf')]",
+      "name": "[variables('pipName0')]",
       "location": "[parameters('computeLocation')]",
       "properties": {
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('dnsName'),'-','sf')]"
+          "domainNameLabel": "[concat(parameters('clusterDnsName'),'-','sf')]"
         },
         "publicIPAllocationMethod": "[parameters('publicIPAddressType')]"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -388,7 +380,7 @@
       "name": "[variables('lbName0')]",
       "location": "[parameters('computeLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('lbIPName'),'-sf')]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('pipName0'))]"
       ],
       "properties": {
         "frontendIPConfigurations": [
@@ -396,7 +388,7 @@
             "name": "LoadBalancerIPConfig",
             "properties": {
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('lbIPName'),'-sf'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('pipName0'))]"
               }
             }
           }
@@ -483,7 +475,7 @@
         ]
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -587,7 +579,7 @@
         ]
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -596,7 +588,7 @@
       "name": "[variables('lbName1')]",
       "location": "[parameters('computeLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('lbIPName'),'-backend')]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('pipName1'))]"
       ],
       "properties": {
         "frontendIPConfigurations": [
@@ -604,7 +596,7 @@
             "name": "LoadBalancerIPConfig",
             "properties": {
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('lbIPName'),'-backend'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('pipName1'))]"
               }
             }
           }
@@ -719,7 +711,7 @@
         ]
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -836,7 +828,7 @@
         ]
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -870,7 +862,7 @@
                   },
                   "publisher": "Microsoft.Azure.ServiceFabric",
                   "settings": {
-                    "clusterEndpoint": "[reference(variables('clusterName')).clusterEndpoint]",
+                    "clusterEndpoint": "[reference(parameters('clusterDnsName')).clusterEndpoint]",
                     "nodeTypeRef": "[variables('vmNodeType0Name')]",
                     "nicPrefixOverride": "[variables('subnet0Prefix')]",
                     "dataPath": "D:\\\\SvcFab",
@@ -931,7 +923,7 @@
                             {
                               "provider": "cbd93bc2-71e5-4566-b3a7-595d8eeca6e8",
                               "scheduledTransferLogLevelFilter": "Information",
-                              "scheduledTransferKeywordFilter": "4611686018427387904",
+                              "scheduledTransferKeywordFilter": "4611686018427387928",
                               "scheduledTransferPeriod": "PT5M",
                               "DefaultEvents": {
                                 "eventDestination": "ServiceFabricSystemEventTable"
@@ -1031,7 +1023,7 @@
         "tier": "Standard"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
@@ -1065,7 +1057,7 @@
                   },
                   "publisher": "Microsoft.Azure.ServiceFabric",
                   "settings": {
-                    "clusterEndpoint": "[reference(variables('clusterName')).clusterEndpoint]",
+                    "clusterEndpoint": "[reference(parameters('clusterDnsName')).clusterEndpoint]",
                     "nodeTypeRef": "[variables('vmNodeType1Name')]",
                     "nicPrefixOverride": "[variables('subnet1Prefix')]",
                     "dataPath": "D:\\\\SvcFab",
@@ -1126,7 +1118,7 @@
                             {
                               "provider": "cbd93bc2-71e5-4566-b3a7-595d8eeca6e8",
                               "scheduledTransferLogLevelFilter": "Information",
-                              "scheduledTransferKeywordFilter": "4611686018427387904",
+                              "scheduledTransferKeywordFilter": "4611686018427387928",
                               "scheduledTransferPeriod": "PT5M",
                               "DefaultEvents": {
                                 "eventDestination": "ServiceFabricSystemEventTable"
@@ -1227,13 +1219,13 @@
       },
       "tags": {
         "resourceType": "Service Nodes",
-        "clusterName": "[variables('clusterName')]"
+        "clusterDnsName": "[parameters('clusterDnsName')]"
       }
     },
     {
       "apiVersion": "2017-07-01-preview",
       "type": "Microsoft.ServiceFabric/clusters",
-      "name": "[variables('clusterName')]",
+      "name": "[parameters('clusterDnsName')]",
       "location": "[parameters('computeLocation')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]"
@@ -1242,11 +1234,11 @@
         "clientCertificateCommonNames": [],
         "clientCertificateThumbprints": [],
         "diagnosticsStorageAccountConfig": {
-          "blobEndpoint": "[concat('https://',variables('supportLogStorageAccountName'),'.blob.core.windows.net/')]",
+          "blobEndpoint": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName')), '2016-01-01').primaryEndpoints.blob]",
           "protectedAccountKeyName": "StorageAccountKey1",
-          "queueEndpoint": "[concat('https://',variables('supportLogStorageAccountName'),'.queue.core.windows.net/')]",
+          "queueEndpoint": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName')), '2016-01-01').primaryEndpoints.queue]",
           "storageAccountName": "[variables('supportLogStorageAccountName')]",
-          "tableEndpoint": "[concat('https://',variables('supportLogStorageAccountName'),'.table.core.windows.net/')]"
+          "tableEndpoint": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName')), '2016-01-01').primaryEndpoints.table]"
         },
         "fabricSettings": [
           {
@@ -1259,7 +1251,7 @@
             ]
           }
         ],
-        "managementEndpoint": "[concat('https://',reference(concat(variables('lbIPName'),'-','sf')).dnsSettings.fqdn,':',variables('nt0fabricHttpGatewayPort'))]",
+        "managementEndpoint": "[concat('http://',reference(variables('pipName0')).dnsSettings.fqdn, ':',variables('nt0fabricHttpGatewayPort'))]",
         "nodeTypes": [
           {
             "name": "[variables('vmNodeType0Name')]",
@@ -1311,13 +1303,13 @@
         "vmImage": "Windows"
       },
       "tags": {
-        "clusterName": "[variables('clusterName')]"
+        "clusterName": "[parameters('clusterDnsName')]"
       }
     },
     {
       "apiVersion": "2015-11-01-preview",
       "location": "[parameters('omsRegion')]",
-      "name": "[variables('solution')]",
+      "name": "[variables('serviceFabricOmsSolution').Name]",
       "type": "Microsoft.OperationsManagement/solutions",
       "id": "[resourceId('Microsoft.OperationsManagement/solutions/', variables('solution'))]",
       "dependsOn": [
@@ -1327,17 +1319,17 @@
         "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspacename'))]"
       },
       "plan": {
-        "name": "[variables('solution')]",
+        "name": "[variables('serviceFabricOmsSolution').Name]",
         "publisher": "Microsoft",
-        "product": "[Concat('OMSGallery/', variables('solutionName'))]",
+        "product": "[Concat('OMSGallery/', variables('serviceFabricOmsSolution').GalleryName)]",
         "promotionCode": ""
       }
     },
     {
       "apiVersion": "2017-03-15-preview",
-      "location": "[parameters('omsRegion')]",
-      "name": "[variables('omsWorkspacename')]",
       "type": "Microsoft.OperationalInsights/workspaces",
+      "name": "[variables('omsWorkspacename')]",
+      "location": "[parameters('omsRegion')]",
       "properties": {
         "sku": {
           "name": "[parameters('omsServiceTier')]"
@@ -1595,8 +1587,8 @@
     }
   ],
   "outputs": {
-    "clusterName": {
-      "value": "[variables('clusterName')]",
+    "clusterDnsName": {
+      "value": "[parameters('clusterDnsName')]",
       "type": "string"
     },
     "omsWorkspaceId": {

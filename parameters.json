@@ -2,14 +2,8 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "envPrefix": {
-      "value": "japoondevicesimulator"
-    },
-    "envPrefixLiteral": {
-      "value": "devicesimulator"
-    },
-    "dnsName": {
-      "value": "japoondevicesimulator"
+    "clusterDnsName": {
+      "value": "japoonasftest5"
     },
     "adminUsername": {
       "value": "superuser"
