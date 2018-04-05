@@ -274,8 +274,10 @@
     "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]",
     "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-oms')]",
     "nestedTemplates": {
-      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]"
-    }
+      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]",
+      "vmExtensionOmsAgent": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/vmExtensionOmsAgent.json')]"
+    },
+    "vmssNames": "[createArray(variables('vmNodeType0Name'), variables('vmNodeType1Name'))]"
   },
   "resources": [
     {
@@ -308,6 +310,34 @@
             "value": "[variables('applicationDiagnosticsStorageAccountName')]"
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "[concat('vmExtensionOmsAgent-', variables('vmssNames')[copyIndex()])]", 
+      "dependsOn": [
+        "omsWorkspaceDeployment",
+        "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNames')[copyIndex()])]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('nestedTemplates').vmExtensionOmsAgent]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vmssName": {
+            "value": "[variables('vmssNames')[copyIndex()]]"
+          },
+          "omsWorkspaceName": {
+            "value": "[variables('omsWorkspaceName')]"
+          }
+        }
+      },
+      "copy": { 
+        "name": "vmssNameCopy", 
+        "count": "[length(variables('vmssNames'))]" 
       }
     },
     {
@@ -903,21 +933,6 @@
                 }
               },
               {
-                "name": "[concat(variables('vmNodeType0Name'),'OMS')]",
-                "properties": {
-                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "type": "MicrosoftMonitoringAgent",
-                  "typeHandlerVersion": "1.0",
-                  "autoUpgradeMinorVersion": true,
-                  "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
-                  },
-                  "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
-                  }
-                }
-              },
-              {
                 "name": "[concat('VMDiagnosticsVmExt','_', variables('vmNodeType0Name'))]",
                 "properties": {
                   "type": "IaaSDiagnostics",
@@ -1096,21 +1111,6 @@
                     "durabilityLevel": "[parameters('node1Durability')]"
                   },
                   "typeHandlerVersion": "1.0"
-                }
-              },
-              {
-                "name": "[concat(variables('vmNodeType1Name'),'OMS')]",
-                "properties": {
-                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "type": "MicrosoftMonitoringAgent",
-                  "typeHandlerVersion": "1.0",
-                  "autoUpgradeMinorVersion": true,
-                  "settings": {
-                    "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
-                  },
-                  "protectedSettings": {
-                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
-                  }
                 }
               },
               {
