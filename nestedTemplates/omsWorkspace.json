@@ -61,6 +61,10 @@
                 {
                     "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
                     "marketplaceName": "ServiceFabric"
+                },
+                {
+                    "name": "[concat('ServiceMap', '(', parameters('omsWorkspaceName'), ')')]",
+                    "marketplaceName": "ServiceMap"
                 }
             ]
         }

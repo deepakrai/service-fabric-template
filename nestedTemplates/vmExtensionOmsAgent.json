@@ -1,0 +1,37 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmssName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Virtual Machine Scale Set"
+            }
+        },
+        "omsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Virtual Machine Scale Set"
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-12-01",
+            "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+            "name": "[concat(parameters('vmssName'), '/DependencyAgent')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                "type": "MicrosoftMonitoringAgent",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').customerId]"
+                },
+                "protectedSettings": {
+                  "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')),'2015-11-01-preview').primarySharedKey]"
+                }
+            }
+        }
+    ]
+}
