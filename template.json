@@ -275,7 +275,8 @@
     "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-oms')]",
     "nestedTemplates": {
       "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]",
-      "vmExtensionOmsAgent": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/vmExtensionOmsAgent.json')]"
+      "vmExtensionOmsAgent": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/vmExtensionOmsAgent.json')]",
+      "vmExtensionWadCfg": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/vmExtensionWadCfg.json')]"
     },
     "vmssNames": "[createArray(variables('vmNodeType0Name'), variables('vmNodeType1Name'))]"
   },
@@ -332,6 +333,40 @@
           },
           "omsWorkspaceName": {
             "value": "[variables('omsWorkspaceName')]"
+          }
+        }
+      },
+      "copy": { 
+        "name": "vmssNameCopy", 
+        "count": "[length(variables('vmssNames'))]" 
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "[concat('vmExtensionWadCfg-', variables('vmssNames')[copyIndex()])]", 
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNames')[copyIndex()])]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('nestedTemplates').vmExtensionWadCfg]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vmssName": {
+            "value": "[variables('vmssNames')[copyIndex()]]"
+          },
+          "applicationDiagnosticsStorageAccountName": {
+            "value": "[variables('applicationDiagnosticsStorageAccountName')]"
+          },
+          "perCounterTransferPeriod": {
+            "value": "[parameters('perCounterTransferPeriod')]"
+          },
+          "perfCounterSampleRate": {
+            "value": "[parameters('perfCounterSampleRate')]"
           }
         }
       },
@@ -931,83 +966,6 @@
                   },
                   "typeHandlerVersion": "1.0"
                 }
-              },
-              {
-                "name": "[concat('VMDiagnosticsVmExt','_', variables('vmNodeType0Name'))]",
-                "properties": {
-                  "type": "IaaSDiagnostics",
-                  "autoUpgradeMinorVersion": true,
-                  "protectedSettings": {
-                    "storageAccountName": "[variables('applicationDiagnosticsStorageAccountName')]",
-                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]",
-                    "storageAccountEndPoint": "https://core.windows.net/"
-                  },
-                  "publisher": "Microsoft.Azure.Diagnostics",
-                  "settings": {
-                    "WadCfg": {
-                      "DiagnosticMonitorConfiguration": {
-                        "overallQuotaInMB": "50000",
-                        "EtwProviders": {
-                          "EtwEventSourceProviderConfiguration": [
-                            {
-                              "provider": "Microsoft-ServiceFabric-Actors",
-                              "scheduledTransferKeywordFilter": "1",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricReliableActorEventTable"
-                              }
-                            },
-                            {
-                              "provider": "Microsoft-ServiceFabric-Services",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricReliableServiceEventTable"
-                              }
-                            }
-                          ],
-                          "EtwManifestProviderConfiguration": [
-                            {
-                              "provider": "cbd93bc2-71e5-4566-b3a7-595d8eeca6e8",
-                              "scheduledTransferLogLevelFilter": "Information",
-                              "scheduledTransferKeywordFilter": "4611686018427387928",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricSystemEventTable"
-                              }
-                            }
-                          ]
-                        },
-                        "PerformanceCounters": {
-                          "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
-                          "PerformanceCounterConfiguration": [
-                            {
-                              "counterSpecifier": "\\Service Fabric Transactional Replicator(*)\\Avg. Transaction ms/Commit",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\# of outstanding requests",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for response serialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for request deserialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds per request",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "StorageAccount": "[variables('applicationDiagnosticsStorageAccountName')]"
-                  },
-                  "typeHandlerVersion": "1.5"
-                }
               }
             ]
           },
@@ -1111,83 +1069,6 @@
                     "durabilityLevel": "[parameters('node1Durability')]"
                   },
                   "typeHandlerVersion": "1.0"
-                }
-              },
-              {
-                "name": "[concat('VMDiagnosticsVmExt','_', variables('vmNodeType1Name'))]",
-                "properties": {
-                  "type": "IaaSDiagnostics",
-                  "autoUpgradeMinorVersion": true,
-                  "protectedSettings": {
-                    "storageAccountName": "[variables('applicationDiagnosticsStorageAccountName')]",
-                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]",
-                    "storageAccountEndPoint": "https://core.windows.net/"
-                  },
-                  "publisher": "Microsoft.Azure.Diagnostics",
-                  "settings": {
-                    "WadCfg": {
-                      "DiagnosticMonitorConfiguration": {
-                        "overallQuotaInMB": "50000",
-                        "EtwProviders": {
-                          "EtwEventSourceProviderConfiguration": [
-                            {
-                              "provider": "Microsoft-ServiceFabric-Actors",
-                              "scheduledTransferKeywordFilter": "1",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricReliableActorEventTable"
-                              }
-                            },
-                            {
-                              "provider": "Microsoft-ServiceFabric-Services",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricReliableServiceEventTable"
-                              }
-                            }
-                          ],
-                          "EtwManifestProviderConfiguration": [
-                            {
-                              "provider": "cbd93bc2-71e5-4566-b3a7-595d8eeca6e8",
-                              "scheduledTransferLogLevelFilter": "Information",
-                              "scheduledTransferKeywordFilter": "4611686018427387928",
-                              "scheduledTransferPeriod": "PT5M",
-                              "DefaultEvents": {
-                                "eventDestination": "ServiceFabricSystemEventTable"
-                              }
-                            }
-                          ]
-                        },
-                        "PerformanceCounters": {
-                          "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
-                          "PerformanceCounterConfiguration": [
-                            {
-                              "counterSpecifier": "\\Service Fabric Transactional Replicator(*)\\Avg. Transaction ms/Commit",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\# of outstanding requests",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for response serialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for request deserialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds per request",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "StorageAccount": "[variables('applicationDiagnosticsStorageAccountName')]"
-                  },
-                  "typeHandlerVersion": "1.5"
                 }
               }
             ]

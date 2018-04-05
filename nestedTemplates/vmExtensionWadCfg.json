@@ -38,8 +38,8 @@
                 "type": "IaaSDiagnostics",
                 "autoUpgradeMinorVersion": true,
                 "protectedSettings": {
-                  "storageAccountName": "[variables('applicationDiagnosticsStorageAccountName')]",
-                  "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]",
+                  "storageAccountName": "[parameters('applicationDiagnosticsStorageAccountName')]",
+                  "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]",
                   "storageAccountEndPoint": "https://core.windows.net/"
                 },
                 "publisher": "Microsoft.Azure.Diagnostics",
@@ -104,7 +104,7 @@
                       }
                     }
                   },
-                  "StorageAccount": "[variables('applicationDiagnosticsStorageAccountName')]"
+                  "StorageAccount": "[parameters('applicationDiagnosticsStorageAccountName')]"
                 },
                 "typeHandlerVersion": "1.5"
               }
