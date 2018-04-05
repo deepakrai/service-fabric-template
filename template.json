@@ -280,8 +280,8 @@
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
-      "name": "omsWorkspace",
+      "apiVersion": "2017-05-10",
+      "name": "omsWorkspaceDeployment",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
       ],
@@ -871,7 +871,7 @@
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName0'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
-        "omsWorkspace"
+        "omsWorkspaceDeployment"
       ],
       "properties": {
         "overprovision": false,
@@ -1067,7 +1067,7 @@
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName1'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]",
-        "omsWorkspace"
+        "omsWorkspaceDeployment"
       ],
       "properties": {
         "overprovision": false,
@@ -1343,14 +1343,6 @@
     "clusterDnsName": {
       "value": "[parameters('clusterDnsName')]",
       "type": "string"
-    },
-    "omsWorkspaceId": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').customerId]"
-    },
-    "omsWorkspaceKey": {
-      "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName')), '2015-11-01-preview').primarySharedKey]"
     }
   }
 }
