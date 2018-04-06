@@ -19,7 +19,7 @@
     {
       "apiVersion": "2017-12-01",
       "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
-      "name": "[concat(parameters('vmssName'), '/OmsAgent')]",
+      "name": "[concat('vmExt', parameters('vmssName'), '_omsAgent')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.EnterpriseCloud.Monitoring",
