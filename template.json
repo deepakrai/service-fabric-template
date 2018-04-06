@@ -122,8 +122,7 @@
       "allowedValues": [
         "Bronze",
         "Silver",
-        "Gold",
-        "Platinum"
+        "Gold"
       ],
       "defaultValue": "Silver",
       "metadata": {
@@ -153,6 +152,22 @@
       "metadata": {
         "description": "Remote desktop user password. Must be a strong password"
       }
+    },
+    "sfReverseProxyPort": {
+      "type": "int",
+      "defaultValue": 19081,
+      "metadata": {
+        "description": "Endpoint for Service Fabric Reverse proxy"
+      }
+    },
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS"
+      ]
     },
     "omsWorkspaceRegion": {
       "type": "string",
@@ -184,22 +199,6 @@
       "metadata": {
         "description": "Performance counter reporting interval (in seconds)"
       }
-    },
-    "sfReverseProxyPort": {
-      "type": "int",
-      "defaultValue": 19081,
-      "metadata": {
-        "description": "Endpoint for Service Fabric Reverse proxy"
-      }
-    },
-    "storageAccountType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_ZRS"
-      ]
     },
     "perfCounterSampleRate": {
       "type": "string",
@@ -233,6 +232,8 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "addressPrefix": "10.0.0.0/16",
     "nicName": "nic",
+    "supportLogStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'log'))]",
+    "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'diag'))]",
     "nt0applicationStartPort": 20000,
     "nt0applicationEndPort": 30000,
     "nt0ephemeralStartPort": 49152,
@@ -251,8 +252,6 @@
     "subnet1Name": "Subnet-1",
     "subnet1Prefix": "10.0.1.0/24",
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
-    "supportLogStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'log'))]",
-    "applicationDiagnosticsStorageAccountName": "[toLower(concat(parameters('clusterDnsName'), 'diag'))]",
     "pipName0": "pip-sf",
     "lbName0": "[toLower(concat(parameters('clusterDnsName'), '-LB-', variables('vmNodeType0Name')))]",
     "lbID0": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName0'))]",
@@ -274,8 +273,7 @@
     "vmNodeType1Name": "[toLower(concat(variables('vmName'), '-backend'))]",
     "omsWorkspaceName": "[concat(parameters('clusterDnsName'), '-oms')]",
     "nestedTemplates": {
-      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]",
-      "vmExtensionOmsAgent": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/vmExtensionOmsAgent.json')]"
+      "omsWorkspace": "[concat(parameters('_artifactsLocation'), '/nestedTemplates/omsWorkspace.json')]"
     },
     "vmssNames": "[createArray(variables('vmNodeType0Name'), variables('vmNodeType1Name'))]"
   },
@@ -310,34 +308,6 @@
             "value": "[variables('applicationDiagnosticsStorageAccountName')]"
           }
         }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2017-05-10",
-      "name": "[concat('vmExtensionOmsAgent-', variables('vmssNames')[copyIndex()])]", 
-      "dependsOn": [
-        "omsWorkspaceDeployment",
-        "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNames')[copyIndex()])]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('nestedTemplates').vmExtensionOmsAgent]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "vmssName": {
-            "value": "[variables('vmssNames')[copyIndex()]]"
-          },
-          "omsWorkspaceName": {
-            "value": "[variables('omsWorkspaceName')]"
-          }
-        }
-      },
-      "copy": { 
-        "name": "vmssNameCopy", 
-        "count": "[length(variables('vmssNames'))]" 
       }
     },
     {
@@ -933,6 +903,21 @@
                 }
               },
               {
+                "name": "[concat('vmExt', variables('vmNodeType0Name'),'_oms')]",
+                "properties": {
+                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                  "type": "MicrosoftMonitoringAgent",
+                  "typeHandlerVersion": "1.0",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "workspaceId": "[reference('omsWorkspaceDeployment').outputs.omsWorkspaceId.value]"
+                  },
+                  "protectedSettings": {
+                    "workspaceKey": "[reference('omsWorkspaceDeployment').outputs.omsWorkspaceKey.value]"
+                  }
+                }
+              },
+              {
                 "name": "[concat('vmExt', variables('vmNodeType0Name'), '_diag')]",
                 "properties": {
                   "type": "IaaSDiagnostics",
@@ -1111,6 +1096,21 @@
                     "durabilityLevel": "[parameters('node1Durability')]"
                   },
                   "typeHandlerVersion": "1.0"
+                }
+              },
+              {
+                "name": "[concat('vmExt', variables('vmNodeType1Name'),'_oms')]",
+                "properties": {
+                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                  "type": "MicrosoftMonitoringAgent",
+                  "typeHandlerVersion": "1.0",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "workspaceId": "[reference('omsWorkspaceDeployment').outputs.omsWorkspaceId.value]"
+                  },
+                  "protectedSettings": {
+                    "workspaceKey": "[reference('omsWorkspaceDeployment').outputs.omsWorkspaceKey.value]"
+                  }
                 }
               },
               {
