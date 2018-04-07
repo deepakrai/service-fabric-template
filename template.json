@@ -259,6 +259,7 @@
     "lbPoolID0": "[concat(variables('lbID0'),'/backendAddressPools/LoadBalancerBEAddressPool')]",
     "lbProbeID0": "[concat(variables('lbID0'),'/probes/FabricGatewayProbe')]",
     "lbHttpProbeID0": "[concat(variables('lbID0'),'/probes/FabricHttpGatewayProbe')]",
+    "lbReverseProxyProbeID0": "[concat(variables('lbID0'),'/probes/FabricReverseProxyProbe')]",
     "lbNatPoolID0": "[concat(variables('lbID0'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
     "vmNodeType0Name": "[toLower(concat(variables('vmName'), '-sf'))]",
     "pipName1": "pip-backend",
@@ -467,7 +468,26 @@
               },
               "protocol": "Tcp"
             }
-          }
+          },
+          {
+           "name": "LBSFReverseProxyRule",
+           "properties": {
+             "backendAddressPool": {
+               "id": "[variables('lbPoolID0')]"
+             },
+             "backendPort": "[parameters('sfReverseProxyPort')]",
+             "enableFloatingIP": false,
+             "frontendIPConfiguration": {
+               "id": "[variables('lbIPConfig0')]"
+             },
+             "frontendPort": "[parameters('sfReverseProxyPort')]",
+             "idleTimeoutInMinutes": 5,
+             "probe": {
+               "id": "[variables('lbReverseProxyProbeID0')]"
+             },
+             "protocol": "Tcp"
+           }
+         }
         ],
         "probes": [
           {
@@ -485,6 +505,15 @@
               "intervalInSeconds": 5,
               "numberOfProbes": 2,
               "port": "[variables('nt0fabricHttpGatewayPort')]",
+              "protocol": "Tcp"
+            }
+          },
+          {
+            "name": "FabricReverseProxyProbe",
+            "properties": {
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2,
+              "port": "[parameters('sfReverseProxyPort')]",
               "protocol": "Tcp"
             }
           }
@@ -601,6 +630,19 @@
               "destinationPortRange": "3389-4500",
               "direction": "Inbound",
               "priority": 3960,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allowReverseProxy",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "[parameters('sfReverseProxyPort')]",
+              "direction": "Inbound",
+              "priority": 3970,
               "protocol": "*",
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*"
