@@ -6,6 +6,11 @@ Deploys Service Fabric with:
 * Managed Disks
 * OMS
 * Unsecured cluster
+* Reverse proxy enabled on `:19081`
+
+## Setup
+
+* Update **[parameters.json](https://github.com/jpoon/service-fabric-template/blob/master/parameters.json)** to be the values of your cluster setup.
 
 ## Usage
 
