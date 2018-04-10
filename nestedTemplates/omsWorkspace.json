@@ -66,7 +66,7 @@
                 {
                     "displayName": "Error records by hour",
                     "query": "Type=MyRecord_CL | measure avg(Rating_d) by Instance_s interval 60minutes",
-                    "category": "Samples",
+                    "category": "Service Fabric",
                     "name": "Samples-Count of data"
                 }
             ],
@@ -159,12 +159,106 @@
                 "sku": {
                     "name": "[parameters('omsServiceTier')]"
                 }
-            }
+            },
+            "resources": [
+                {
+                    "name": "AzureActivityLog",
+                    "type": "datasources",
+                    "apiVersion": "2015-11-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+                    ],
+                    "kind": "AzureActivityLog",
+                    "properties": {
+                        "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
+                    }
+                },
+                {
+                    "name": "[concat(variables('perfCounters')[copyIndex()].Name)]",
+                    "type": "datasources",
+                    "apiVersion": "2015-11-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+                    ],
+                    "kind": "WindowsPerformanceCounter",
+                    "copy": {
+                        "name": "perfCountersCopy",
+                        "count": "[length(variables('perfCounters'))]"
+                    },
+                    "properties": {
+                        "objectName": "[variables('perfCounters')[copyIndex()].ObjectName]",
+                        "instanceName": "*",
+                        "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
+                        "counterName": "[variables('perfCounters')[copyIndex()].CounterName]"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "System",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+                    ],
+                    "kind": "WindowsEvent",
+                    "properties": {
+                        "eventLogName": "System",
+                        "eventTypes": [
+                            {
+                                "eventType": "Error"
+                            },
+                            {
+                                "eventType": "Warning"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "Application",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+                    ],
+                    "kind": "WindowsEvent",
+                    "properties": {
+                        "eventLogName": "Application",
+                        "eventTypes": [
+                            {
+                                "eventType": "Error"
+                            },
+                            {
+                                "eventType": "Warning"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "ApplicationDiagnosticsStorage",
+                    "type": "storageinsightconfigs",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename'))]"
+                    ],
+                    "properties": {
+                        "containers": [],
+                        "tables": [
+                            "WADPerformanceCountersTable",
+                            "WADServiceFabric*EventTable",
+                            "WADWindowsEventLogsTable",
+                            "WADETWEventTable"
+                        ],
+                        "storageAccount": {
+                            "id": "[resourceId('Microsoft.Storage/storageaccounts/', parameters('applicationDiagnosticsStorageAccountName'))]",
+                            "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
+                        }
+                    }
+                }
+            ]
         },
         {
             "apiVersion": "2015-03-20",            
-            "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+            "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
             ],
@@ -177,6 +271,25 @@
                 "query": "[variables('queries')[copyIndex()].query]",
                 "displayName": "[variables('queries')[copyIndex()].displayName]",
                 "category": "[variables('queries')[copyIndex()].category]"
+            }
+        },
+        {
+            "apiVersion": "2015-11-01-preview",
+            "name": "[concat(parameters('omsWorkspaceName'), '/', variables('perfCounters')[copyIndex()].Name)]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+            ],
+            "kind": "WindowsPerformanceCounter",
+            "copy": {
+                "name": "perfCountersCopy",
+                "count": "[length(variables('perfCounters'))]"
+            },
+            "properties": {
+                "objectName": "[variables('perfCounters')[copyIndex()].ObjectName]",
+                "instanceName": "*",
+                "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
+                "counterName": "[variables('perfCounters')[copyIndex()].CounterName]"
             }
         },
         {
