@@ -159,119 +159,26 @@
                 "sku": {
                     "name": "[parameters('omsServiceTier')]"
                 }
+            }
+        },
+        {
+            "apiVersion": "2017-03-15-preview",
+            "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+            "apiVersion": "2015-11-01-preview",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+            ],
+            "copy": {
+                "name": "queryCopy",
+                "count": "[length(variables('queries'))]"
             },
-            "resources": [
-                {
-                    "name": "[concat(variables('queries')[copyIndex()].Name)]",
-                    "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-                    "apiVersion": "2015-11-01-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "copy": {
-                        "name": "queryCopy",
-                        "count": "[length(variables('queries'))]"
-                    },
-                    "properties": {
-                        "etag": "*",
-                        "query": "[variables('queries')[copyIndex()].query]",
-                        "displayName": "[variables('queries')[copyIndex()].displayName]",
-                        "category": "[variables('queries')[copyIndex()].category]"
-                    }
-                },
-                {
-                    "name": "AzureActivityLog",
-                    "type": "datasources",
-                    "apiVersion": "2015-11-01-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "kind": "AzureActivityLog",
-                    "properties": {
-                        "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
-                    }
-                },
-                {
-                    "name": "[concat(variables('perfCounters')[copyIndex()].Name)]",
-                    "type": "datasources",
-                    "apiVersion": "2015-11-01-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "kind": "WindowsPerformanceCounter",
-                    "copy": {
-                        "name": "perfCountersCopy",
-                        "count": "[length(variables('perfCounters'))]"
-                    },
-                    "properties": {
-                        "objectName": "[variables('perfCounters')[copyIndex()].ObjectName]",
-                        "instanceName": "*",
-                        "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-                        "counterName": "[variables('perfCounters')[copyIndex()].CounterName]"
-                    }
-                },
-                {
-                    "apiVersion": "2015-11-01-preview",
-                    "type": "datasources",
-                    "name": "System",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "kind": "WindowsEvent",
-                    "properties": {
-                        "eventLogName": "System",
-                        "eventTypes": [
-                            {
-                                "eventType": "Error"
-                            },
-                            {
-                                "eventType": "Warning"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "apiVersion": "2015-11-01-preview",
-                    "type": "datasources",
-                    "name": "Application",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "kind": "WindowsEvent",
-                    "properties": {
-                        "eventLogName": "Application",
-                        "eventTypes": [
-                            {
-                                "eventType": "Error"
-                            },
-                            {
-                                "eventType": "Warning"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "apiVersion": "2015-11-01-preview",
-                    "name": "ApplicationDiagnosticsStorage",
-                    "type": "storageinsightconfigs",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspacename'))]"
-                    ],
-                    "properties": {
-                        "containers": [],
-                        "tables": [
-                            "WADPerformanceCountersTable",
-                            "WADServiceFabric*EventTable",
-                            "WADWindowsEventLogsTable",
-                            "WADETWEventTable"
-                        ],
-                        "storageAccount": {
-                            "id": "[resourceId('Microsoft.Storage/storageaccounts/', parameters('applicationDiagnosticsStorageAccountName'))]",
-                            "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
-                        }
-                    }
-                }
-            ]
+            "properties": {
+                "etag": "*",
+                "query": "[variables('queries')[copyIndex()].query]",
+                "displayName": "[variables('queries')[copyIndex()].displayName]",
+                "category": "[variables('queries')[copyIndex()].category]"
+            }
         },
         {
             "apiVersion": "2015-11-01-preview",
