@@ -162,7 +162,7 @@
             }
         },
         {
-            "apiVersion": "2017-03-15-preview",
+            "apiVersion": "2015-03-20",            
             "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "dependsOn": [
