@@ -48,109 +48,110 @@
         }
     },
     "variables": {
-            "solutions": [
-                {
-                    "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "Security"
-                },
-                {
-                    "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "AgentHealthAssessment"
-                },
-                {
-                    "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
-                    "marketplaceName": "ServiceFabric"
-                }
-            ],
-            "queries": [
-                {
-                    "displayName": "Error records by hour",
-                    "query": "Type=MyRecord_CL | measure avg(Rating_d) by Instance_s interval 60minutes",
-                    "category": "Service Fabric",
-                    "name": "Samples-Count of data"
-                }
-            ],
-            "perfCounters": [
-                {
-                    "name": "DiskAvgWritePerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Avg Disk sec/Write"
-                },
-                {
-                    "name": "DiskAvgReadPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Avg Disk sec/Read"
-                },
-                {
-                    "name": "DiskCurrentQueueLengthPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Current Disk Queue Length"
-                },
-                {
-                    "name": "DiskReadsSecPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Disk Reads/sec"
-                },
-                {
-                    "name": "DiskTransSecPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Disk Transfers/sec"
-                },
-                {
-                    "name": "DiskWriteSecPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Disk Writes/sec"
-                },
-                {
-                    "name": "DiskFreeMegabytesPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "Free Megabytes"
-                },
-                {
-                    "name": "DiskPctFreeSpacePerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "% Free Space"
-                },
-                {
-                    "name": "MemoryAvailableMBytesPerfCounter",
-                    "objectName": "Memory",
-                    "counterName": "Available MBytes"
-                },
-                {
-                    "name": "MemoryPctCommittedPerfCounter",
-                    "objectName": "LogicalDisk",
-                    "counterName": "% Committed Bytes In Use"
-                },
-                {
-                    "name": "NetworkBytesReceivedSecPerfCounter",
-                    "objectName": "Network Adapter",
-                    "counterName": "Bytes Received/sec"
-                },
-                {
-                    "name": "NetworkBytesSentSecPerfCounter",
-                    "objectName": "Network Adapter",
-                    "counterName": "Bytes Sent/sec"
-                },
-                {
-                    "name": "NetworkBytesTotalSecPerfCounter",
-                    "objectName": "Network Interface",
-                    "counterName": "Bytes Total/sec"
-                },
-                {
-                    "name": "ProcessorPctTotalTimePerfCounter",
-                    "objectName": "Processor",
-                    "counterName": "% Processor Time"
-                },
-                {
-                    "name": "SystemProcessorQueueLengthPerfCounter",
-                    "objectName": "System",
-                    "counterName": "Processor Queue Length"
-                }
-            ]
+        "logAnalyticsApiVersion": "2015-11-01-preview",
+        "solutions": [
+            {
+                "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
+                "marketplaceName": "Security"
+            },
+            {
+                "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
+                "marketplaceName": "AgentHealthAssessment"
+            },
+            {
+                "name": "[concat('ServiceFabric', '(', parameters('omsWorkspaceName'), ')')]",
+                "marketplaceName": "ServiceFabric"
+            }
+        ],
+        "queries": [
+            {
+                "displayName": "D Drive Free Space (%)",
+                "query": "Perf | where ( ObjectName == 'LogicalDisk' ) | where ( InstanceName == 'D:' ) | where ( CounterName == '% Free Space' ) | where TimeGenerated < ago(10minutes) | summarize FreeSpace_DDisk_Percent = avg(CounterValue) by Computer",
+                "category": "Service Fabric",
+                "name": "D Drive Free Space"
+            }
+        ],
+        "perfCounters": [
+            {
+                "name": "DiskAvgWritePerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Avg Disk sec/Write"
+            },
+            {
+                "name": "DiskAvgReadPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Avg Disk sec/Read"
+            },
+            {
+                "name": "DiskCurrentQueueLengthPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Current Disk Queue Length"
+            },
+            {
+                "name": "DiskReadsSecPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Disk Reads/sec"
+            },
+            {
+                "name": "DiskTransSecPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Disk Transfers/sec"
+            },
+            {
+                "name": "DiskWriteSecPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Disk Writes/sec"
+            },
+            {
+                "name": "DiskFreeMegabytesPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "Free Megabytes"
+            },
+            {
+                "name": "DiskPctFreeSpacePerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "% Free Space"
+            },
+            {
+                "name": "MemoryAvailableMBytesPerfCounter",
+                "objectName": "Memory",
+                "counterName": "Available MBytes"
+            },
+            {
+                "name": "MemoryPctCommittedPerfCounter",
+                "objectName": "LogicalDisk",
+                "counterName": "% Committed Bytes In Use"
+            },
+            {
+                "name": "NetworkBytesReceivedSecPerfCounter",
+                "objectName": "Network Adapter",
+                "counterName": "Bytes Received/sec"
+            },
+            {
+                "name": "NetworkBytesSentSecPerfCounter",
+                "objectName": "Network Adapter",
+                "counterName": "Bytes Sent/sec"
+            },
+            {
+                "name": "NetworkBytesTotalSecPerfCounter",
+                "objectName": "Network Interface",
+                "counterName": "Bytes Total/sec"
+            },
+            {
+                "name": "ProcessorPctTotalTimePerfCounter",
+                "objectName": "Processor",
+                "counterName": "% Processor Time"
+            },
+            {
+                "name": "SystemProcessorQueueLengthPerfCounter",
+                "objectName": "System",
+                "counterName": "Processor Queue Length"
+            }
+        ]
     },
     "resources": [
         {
-            "apiVersion": "2017-03-15-preview",
+            "apiVersion": "[variables('logAnalyticsApiVersion')]",
             "type": "Microsoft.OperationalInsights/workspaces",
             "name": "[parameters('omsWorkspaceName')]",
             "location": "[parameters('omsWorkspaceRegion')]",
@@ -162,9 +163,9 @@
             },
             "resources": [
                 {
+                    "apiVersion": "[variables('logAnalyticsApiVersion')]",
                     "name": "AzureActivityLog",
                     "type": "datasources",
-                    "apiVersion": "2015-11-01-preview",
                     "dependsOn": [
                         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
                     ],
@@ -174,7 +175,7 @@
                     }
                 },
                 {
-                    "apiVersion": "2015-11-01-preview",
+                    "apiVersion": "[variables('logAnalyticsApiVersion')]",
                     "type": "datasources",
                     "name": "System",
                     "dependsOn": [
@@ -194,7 +195,7 @@
                     }
                 },
                 {
-                    "apiVersion": "2015-11-01-preview",
+                    "apiVersion": "[variables('logAnalyticsApiVersion')]",
                     "type": "datasources",
                     "name": "Application",
                     "dependsOn": [
@@ -214,7 +215,7 @@
                     }
                 },
                 {
-                    "apiVersion": "2015-11-01-preview",
+                    "apiVersion": "[variables('logAnalyticsApiVersion')]",
                     "name": "ApplicationDiagnosticsStorage",
                     "type": "storageinsightconfigs",
                     "dependsOn": [
@@ -237,7 +238,7 @@
             ]
         },
         {
-            "apiVersion": "2015-03-20",            
+            "apiVersion": "2017-03-03-preview",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
             "dependsOn": [
@@ -255,7 +256,7 @@
             }
         },
         {
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "[variables('logAnalyticsApiVersion')]",
             "name": "[concat(parameters('omsWorkspaceName'), '/', variables('perfCounters')[copyIndex()].Name)]",
             "type": "Microsoft.OperationalInsights/workspaces/dataSources",
             "dependsOn": [
@@ -274,7 +275,7 @@
             }
         },
         {
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "[variables('logAnalyticsApiVersion')]",
             "type": "Microsoft.OperationsManagement/solutions",
             "name": "[concat(variables('solutions')[copyIndex()].Name)]",
             "location": "[parameters('omsWorkspaceRegion')]",
