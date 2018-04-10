@@ -165,7 +165,6 @@
             "apiVersion": "2017-03-15-preview",
             "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name)]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
-            "apiVersion": "2015-11-01-preview",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
             ],
