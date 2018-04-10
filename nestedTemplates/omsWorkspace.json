@@ -174,25 +174,6 @@
                     }
                 },
                 {
-                    "name": "[concat(variables('perfCounters')[copyIndex()].Name)]",
-                    "type": "datasources",
-                    "apiVersion": "2015-11-01-preview",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
-                    ],
-                    "kind": "WindowsPerformanceCounter",
-                    "copy": {
-                        "name": "perfCountersCopy",
-                        "count": "[length(variables('perfCounters'))]"
-                    },
-                    "properties": {
-                        "objectName": "[variables('perfCounters')[copyIndex()].ObjectName]",
-                        "instanceName": "*",
-                        "intervalSeconds": "[parameters('omsPerfCounterInterval')]",
-                        "counterName": "[variables('perfCounters')[copyIndex()].CounterName]"
-                    }
-                },
-                {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
                     "name": "System",
