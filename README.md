@@ -4,9 +4,9 @@ Deploys Service Fabric with:
 
 * 2 Node Types
 * Managed Disks
-* OMS
-* Unsecured cluster
-* Reverse proxy enabled on `:19081`
+* OMS 
+* Insecure cluster
+* Reverse proxy enabled and open to the Internet on `:19081`
 
 ## Setup
 
