@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "clusterDnsName": {
-      "value": "japoonasftest3"
+      "value": "japoonasftest0"
     },
     "adminUsername": {
       "value": "superuser"
