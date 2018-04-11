@@ -65,10 +65,14 @@
         ],
         "queries": [
             {
+                "name": "D Drive Free Space",
                 "displayName": "D Drive Free Space (%)",
-                "query": "Perf | where ( ObjectName == 'LogicalDisk' ) | where ( InstanceName == 'D:' ) | where ( CounterName == '% Free Space' ) | where TimeGenerated < ago(10minutes) | summarize FreeSpace_DDisk_Percent = avg(CounterValue) by Computer",
                 "category": "Service Fabric",
-                "name": "D Drive Free Space"
+                "query": "Perf | where ( ObjectName == 'LogicalDisk' ) | where ( InstanceName == 'D:' ) | where ( CounterName == '% Free Space' ) | where TimeGenerated < ago(10minutes) | summarize FreeSpace_DDisk_Percent = avg(CounterValue) by Computer",
+                "schedule": {
+                    "interval": 15,
+                    "timeSpan": 60
+                }
             }
         ],
         "perfCounters": [
@@ -253,6 +257,26 @@
                 "query": "[variables('queries')[copyIndex()].query]",
                 "displayName": "[variables('queries')[copyIndex()].displayName]",
                 "category": "[variables('queries')[copyIndex()].category]"
+            }
+        },
+        {
+            "apiVersion": "[variables('logAnalyticsApiVersion')]",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules",
+            "name": "[concat(parameters('omsWorkspaceName'), '/', variables('queries')[copyIndex()].Name, '/schedule')]",
+            "condition": "[not(empty(string(variables('queries')[copyIndex()].schedule.interval)))]",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]",
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'), '/savedSearches/', variables('queries')[copyIndex()].Name)]"
+            ],
+            "copy": {
+                "name": "queryCopy",
+                "count": "[length(variables('queries'))]"
+            },
+            "properties": {
+                "etag": "*",
+                "interval": "[variables('queries')[copyIndex()].schedule.interval]",
+                "queryTimeSpan": "[variables('queries')[copyIndex()].schedule.timeSpan]",
+                "enabled": true
             }
         },
         {
