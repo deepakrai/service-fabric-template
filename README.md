@@ -10,7 +10,7 @@ Deploys Service Fabric with:
 
 ## Setup
 
-* Update **[parameters.json](https://github.com/jpoon/service-fabric-template/blob/master/parameters.json)** to be the values of your cluster setup.
+* Update [parameters.json](https://github.com/jpoon/service-fabric-template/blob/master/parameters.json) to the values you desire for your cluster. 
 
 ## Usage
 
