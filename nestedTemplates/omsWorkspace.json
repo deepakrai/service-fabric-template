@@ -123,7 +123,7 @@
             },
             {
                 "name": "MemoryPctCommittedPerfCounter",
-                "objectName": "LogicalDisk",
+                "objectName": "Memory",
                 "counterName": "% Committed Bytes In Use"
             },
             {
