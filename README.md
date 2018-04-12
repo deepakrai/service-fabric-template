@@ -4,7 +4,7 @@ Deploys Service Fabric with:
 
 * 2 Node Types
 * Managed Disks
-* OMS 
+* OMS (Service Fabric, Security, Agent Health Solutions)
 * Insecure cluster
 * Reverse proxy enabled and open to the Internet on `:19081`
 

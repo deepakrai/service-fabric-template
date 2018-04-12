@@ -5,35 +5,9 @@
     "clusterDnsName": {
       "type": "string",
       "minLength": 3,
-      "maxLength": 23,
+      "maxLength": 15,
       "metadata": {
         "description": "Globally unique name of your cluster, between 3 and 23 characters. Letters and numbers only"
-      }
-    },
-    "computeLocation": {
-      "type": "string",
-      "defaultValue": "East US",
-      "allowedValues": [
-        "East Asia",
-        "Southeast Asia",
-        "Central US",
-        "East US",
-        "East US 2",
-        "West US",
-        "North Central US",
-        "South Central US",
-        "North Europe",
-        "West Europe",
-        "Japan West",
-        "Japan East",
-        "Brazil South",
-        "Canada Central",
-        "Canada East",
-        "West Central US",
-        "West US 2"
-      ],
-      "metadata": {
-        "description": "Select the location for your SF resources"
       }
     },
     "osDiskStorageAccountType": {
@@ -315,7 +289,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('supportLogStorageAccountName')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       },
@@ -327,7 +301,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('applicationDiagnosticsStorageAccountName')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       },
@@ -339,7 +313,7 @@
       "apiVersion": "2017-10-01",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', concat('nsg', variables('subnet0Name')))]",
         "[concat('Microsoft.Network/networkSecurityGroups/', concat('nsg', variables('subnet1Name')))]"
@@ -379,7 +353,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('pipName1')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "dnsSettings": {
           "domainNameLabel": "[concat(parameters('clusterDnsName'),'-','backend')]"
@@ -394,7 +368,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('pipName0')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "dnsSettings": {
           "domainNameLabel": "[concat(parameters('clusterDnsName'),'-','sf')]"
@@ -409,7 +383,7 @@
       "apiVersion": "2017-10-01",
       "type": "Microsoft.Network/loadBalancers",
       "name": "[variables('lbName0')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('pipName0'))]"
       ],
@@ -658,7 +632,7 @@
       "apiVersion": "2017-10-01",
       "type": "Microsoft.Network/loadBalancers",
       "name": "[variables('lbName1')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('pipName1'))]"
       ],
@@ -907,7 +881,7 @@
       "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/virtualMachineScaleSets",
       "name": "[variables('vmNodeType0Name')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName0'))]",
@@ -1103,7 +1077,7 @@
       "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/virtualMachineScaleSets",
       "name": "[variables('vmNodeType1Name')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
         "[concat('Microsoft.Network/loadBalancers/', variables('lbName1'))]",
@@ -1300,7 +1274,7 @@
       "apiVersion": "2017-07-01-preview",
       "type": "Microsoft.ServiceFabric/clusters",
       "name": "[parameters('clusterDnsName')]",
-      "location": "[parameters('computeLocation')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]"
       ],
