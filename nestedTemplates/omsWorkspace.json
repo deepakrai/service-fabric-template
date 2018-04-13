@@ -122,6 +122,16 @@
                 "counterName": "Available MBytes"
             },
             {
+                "name": "MemoryPageFaultsPerSecPerfCounter",
+                "objectName": "Memory",
+                "counterName": "Page Faults/sec"
+            },
+            {
+                "name": "MemoryPageReadsFaultsPerSecPerfCounter",
+                "objectName": "Memory",
+                "counterName": "Page Reads/sec"
+            },
+            {
                 "name": "MemoryPctCommittedPerfCounter",
                 "objectName": "Memory",
                 "counterName": "% Committed Bytes In Use"
@@ -229,13 +239,195 @@
                         "containers": [],
                         "tables": [
                             "WADPerformanceCountersTable",
-                            "WADServiceFabric*EventTable",
-                            "WADWindowsEventLogsTable",
-                            "WADETWEventTable"
+                            "WADServiceFabric*EventTable"
                         ],
                         "storageAccount": {
                             "id": "[resourceId('Microsoft.Storage/storageaccounts/', parameters('applicationDiagnosticsStorageAccountName'))]",
                             "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('applicationDiagnosticsStorageAccountName')),'2015-06-15').key1]"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "[variables('logAnalyticsApiVersion')]",
+                    "name": "Node Metrics",
+                    "type": "views",
+                    "dependson": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName'))]"
+                    ],
+                    "properties": {
+                        "Id": "Node Metrics",
+                        "Name": "Node Metrics",
+                        "Author": "japoon@microsoft.com",
+                        "Source": "Local",
+                        "Version": 2,
+                        "Dashboard": [
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Metrics",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "CPU (%)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where CounterName == \"% Processor Time\" and InstanceName == \"_Total\" | summarize AvgCPUPercent = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Memory Used (%)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ObjectName == \"Memory\" and (CounterName == \"% Used Memory\" or CounterName == \"% Committed Bytes In Use\") | summarize AvgUsedMemory = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Memory Available (MBytes)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ( ObjectName == \"Memory\" ) | where ( CounterName == \"Available MBytes\" ) | summarize AvgMemoryAvailableMBytes = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Disk",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "Free Space on D: (%)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ( ObjectName == \"LogicalDisk\" ) | where ( CounterName == \"% Free Space\" or CounterName == \"D:\" ) | summarize AvgFreeSpace = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Free Space on D (MB)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf  | where ( ObjectName == \"LogicalDisk\" ) | where ( CounterName == \"Free Megabytes\" ) | where ( InstanceName == \"D:\" ) | summarize AvgFreeDiskMBytes = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "Filters": [],
+                        "OverviewTile": {
+                            "Id": "LineChartBuilderTile",
+                            "Type": "OverviewTile",
+                            "Version": 2,
+                            "Configuration": {
+                                "LineChart": {
+                                    "Query": "Perf | where CounterName == \"% Processor Time\" and InstanceName == \"_Total\" | summarize AvgCPUPercent = avg(CounterValue) by Computer, bin(TimeGenerated, 30m)",
+                                    "yAxis": {
+                                        "isLogarithmic": false,
+                                        "units": {
+                                            "baseUnitType": "",
+                                            "baseUnit": "",
+                                            "displayUnit": ""
+                                        },
+                                        "customLabel": ""
+                                    }
+                                },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": false,
+                                        "Query": "search * | limit 1 | project TimeGenerated",
+                                        "Message": ""
+                                    }
+                                }
+                            }
                         }
                     }
                 }

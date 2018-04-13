@@ -190,7 +190,7 @@
     },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/jpoon/service-fabric-template/master",
+      "defaultValue": "https://raw.githubusercontent.com/jpoon/service-fabric-template/oms",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located"
       }
@@ -983,23 +983,25 @@
                           "PerformanceCounterConfiguration": [
                             {
                               "counterSpecifier": "\\Service Fabric Transactional Replicator(*)\\Avg. Transaction ms/Commit",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
+                              "sampleRate": "[parameters('perfCounterSampleRate')]",
+                              "unit": "CountPerSecond",
+                              "annotation": [
+                                {
+                                  "displayName": "Average Commit Latency per Transaction",
+                                  "locale": "en-us"
+                                }
+                              ]
                             },
                             {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\# of outstanding requests",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for response serialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds for request deserialization",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
-                            },
-                            {
-                              "counterSpecifier": "\\Service Fabric Service(*)\\Average milliseconds per request",
-                              "sampleRate": "[parameters('perfCounterSampleRate')]"
+                              "counterSpecifier": "\\Service Fabric Replicator(*)\\# Bytes Replication Queue",
+                              "sampleRate": "[parameters('perfCounterSampleRate')]",
+                              "unit": "Count",
+                              "annotation": [
+                                {
+                                  "displayName": "Size of virtual memory (in bytes) currently occupied by the Replication Queue",
+                                  "locale": "en-us"
+                                }
+                              ]
                             }
                           ]
                         }
