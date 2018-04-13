@@ -127,7 +127,7 @@
                 "counterName": "Page Faults/sec"
             },
             {
-                "name": "MemoryPageReadsFaultsPerSecPerfCounter",
+                "name": "MemoryPageReadsPerSecPerfCounter",
                 "objectName": "Memory",
                 "counterName": "Page Reads/sec"
             },
@@ -160,6 +160,16 @@
                 "name": "SystemProcessorQueueLengthPerfCounter",
                 "objectName": "System",
                 "counterName": "Processor Queue Length"
+            },
+            {
+                "name": "ServiceFabricAverageCommitLatencyPerTransaction",
+                "objectName": "Service Fabric Transactional Replicator",
+                "counterName": "Avg. Transaction ms/Commit"
+            },
+            {
+                "name": "ServiceFabricVirtualMemoryUsedReplicationQueue",
+                "objectName": "Service Fabric Replicator",
+                "counterName": "# Bytes Replication Queue"
             }
         ]
     },
