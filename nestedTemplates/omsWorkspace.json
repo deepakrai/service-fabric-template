@@ -410,6 +410,76 @@
                                         }
                                     ]
                                 }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Service Fabric",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "# Bytes Replication Queue",
+                                                "Subtitle": "Size of virtual memory occupied by the Replication Queue"
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ( ObjectName == \"Service Fabric Replicator\" ) | where CounterName == \"# Bytes Replication Queue\" | summarize VirtualMemoryInBytesReplicationQueue = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Average Commit Latency per Transaction",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ( ObjectName == \"Service Fabric Transactional Replicator\" ) | where CounterName == \"Avg. Transaction ms/Commit\"  | summarize AvgCommitLatency = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
                             }
                         ],
                         "Filters": [],
