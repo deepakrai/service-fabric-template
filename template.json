@@ -929,7 +929,7 @@
                   "settings": {
                     "WadCfg": {
                       "DiagnosticMonitorConfiguration": {
-                        "overallQuotaInMB": "50000",
+                        "overallQuotaInMB": "4096",
                         "EtwProviders": {
                           "EtwEventSourceProviderConfiguration": [
                             {
@@ -1127,7 +1127,7 @@
                   "settings": {
                     "WadCfg": {
                       "DiagnosticMonitorConfiguration": {
-                        "overallQuotaInMB": "50000",
+                        "overallQuotaInMB": "4096",
                         "EtwProviders": {
                           "EtwEventSourceProviderConfiguration": [
                             {
