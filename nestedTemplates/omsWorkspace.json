@@ -51,10 +51,6 @@
         "logAnalyticsApiVersion": "2015-11-01-preview",
         "solutions": [
             {
-                "name": "[concat('Security', '(', parameters('omsWorkspaceName'), ')')]",
-                "marketplaceName": "Security"
-            },
-            {
                 "name": "[concat('AgentHealthAssessment', '(', parameters('omsWorkspaceName'), ')')]",
                 "marketplaceName": "AgentHealthAssessment"
             },
