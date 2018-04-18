@@ -274,7 +274,7 @@
                                 "Version": 0,
                                 "Configuration": {
                                     "General": {
-                                        "title": "Processor",
+                                        "title": "CPU/Memory",
                                         "newGroup": false
                                     },
                                     "charts": [
@@ -285,76 +285,6 @@
                                             },
                                             "LineChart": {
                                                 "Query": "Perf | where CounterName == \"% Processor Time\" and InstanceName == \"_Total\" | summarize AvgCPUPercent = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": ""
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        },
-                                        {
-                                            "Header": {
-                                                "Title": "",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": ""
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        },
-                                        {
-                                            "Header": {
-                                                "Title": "Page Reads (per sec)",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "Perf | where ObjectName == \"Memory\" | where ( CounterName == \"Page Reads/sec\" ) | summarize AvgPageReadsPerSec = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": ""
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "Id": "LineChartCalloutStackedBuilderBlade",
-                                "Type": "Blade",
-                                "Version": 0,
-                                "Configuration": {
-                                    "General": {
-                                        "title": "Memory",
-                                        "newGroup": false
-                                    },
-                                    "charts": [
-                                        {
-                                            "Header": {
-                                                "Title": "Page Faults (per sec)",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "Perf | where ObjectName == \"Memory\" and (CounterName == \"Page Faults/sec\") | summarize PageFaultsPerSec = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -393,6 +323,76 @@
                                             },
                                             "LineChart": {
                                                 "Query": "Perf | where ( ObjectName == \"Memory\" ) | where ( CounterName == \"Available MBytes\" ) | summarize AvgMemoryAvailableMBytes = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart ",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Page Faults",
+                                        "newGroup": false
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "Page Faults (per sec)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ObjectName == \"Memory\" and (CounterName == \"Page Faults/sec\") | summarize PageFaultsPerSec = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Page Reads (per sec)",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "Perf | where ObjectName == \"Memory\" | where ( CounterName == \"Page Reads/sec\" ) | summarize AvgPageReadsPerSec = avg(CounterValue) by Computer, bin(TimeGenerated, 5m) | render timechart",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": ""
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
