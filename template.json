@@ -946,6 +946,14 @@
                               "DefaultEvents": {
                                 "eventDestination": "ServiceFabricReliableServiceEventTable"
                               }
+                            },
+                            {
+                              "provider": "Delphi-ServiceFabric-WebApi",
+                              "scheduledTransferKeywordFilter": "1",
+                              "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
+                              "DefaultEvents": {
+                                "eventDestination": "MyServiceEventTable"
+                              }
                             }
                           ],
                           "EtwManifestProviderConfiguration": [
@@ -1143,6 +1151,14 @@
                               "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
                               "DefaultEvents": {
                                 "eventDestination": "ServiceFabricReliableServiceEventTable"
+                              }
+                            },
+                            {
+                              "provider": "Delphi-ServiceFabric-WebApi",
+                              "scheduledTransferKeywordFilter": "1",
+                              "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
+                              "DefaultEvents": {
+                                "eventDestination": "MyServiceEventTable"
                               }
                             }
                           ],

@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "clusterDnsName": {
-      "value": "japoonasftest0"
+      "value": "japoonasftest3"
     },
     "adminUsername": {
       "value": "superuser"
@@ -12,13 +12,13 @@
       "value": "P@ssword!123"
     },
     "node0VMSize": {
-      "value": "Standard_DS2_v2"
+      "value": "Standard_D2s_v3"
     },
     "node0Count": {
       "value": "3"
     },
     "node1VMSize": {
-      "value": "Standard_DS2_v2"
+      "value": "Standard_D2s_v3"
     },
     "node1Count": {
       "value": "3"
