@@ -1166,7 +1166,7 @@
                             {
                               "provider": "cbd93bc2-71e5-4566-b3a7-595d8eeca6e8",
                               "scheduledTransferLogLevelFilter": "Information",
-                              "scheduledTransferKeywordFilter": "4611686018427387928",
+                              "scheduledTransferKeywordFilter": "4611686018427387944",
                               "scheduledTransferPeriod": "[parameters('perCounterTransferPeriod')]",
                               "DefaultEvents": {
                                 "eventDestination": "ServiceFabricSystemEventTable"
